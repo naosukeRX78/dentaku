@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="実務電卓">
+<meta name="theme-color" content="#0e1013">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>実務電卓</title>
+<style>
+/* Layout: iPhone縦画面1枚に 表示部・スイッチ・キーを収める。テープは下から出るシート */
+:root{
+  color-scheme:dark;
+  --room:#0e1013;
+  --body:#1c1f24; --body-hi:#2c3038; --body-lo:#121418; --edge:#3b404a;
+  --glass:#07080a; --glass-2:#101216;
+  --amber:#ffb547; --amber-hot:#ffd08a; --amber-dim:rgba(255,181,71,.14); --amber-glow:rgba(255,150,30,.55);
+  --key:#2a2e35; --key-top:#363b44; --key-lo:#16181c; --key-fg:#e9e7e2;
+  --num:#e6e3dc; --num-top:#f4f2ec; --num-lo:#9b978e; --num-fg:#17191d;
+  --op:#3a404b; --op-top:#4a515e;
+  --clr:#9c3f30; --clr-top:#b5503e; --clr-lo:#5a2219;
+  --eq:#f0a53a; --eq-top:#ffc066; --eq-lo:#9a6315; --eq-fg:#1d1203;
+  --text:#e8e6e1; --muted:#8b909a; --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.14);
+  --f-ui:"Hiragino Sans","Hiragino Kaku Gothic ProN","BIZ UDPGothic","Yu Gothic UI",system-ui,sans-serif;
+  --f-num:ui-monospace,"SF Mono","Menlo","Consolas",monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--room);color:var(--text);overscroll-behavior:none}
+body{font-family:var(--f-ui);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;overflow:hidden}
+[hidden]{display:none!important}
+.app{height:100%;display:flex;flex-direction:column;gap:10px;max-width:520px;margin:0 auto;
+  padding:calc(env(safe-area-inset-top,0px) + 8px) 12px calc(env(safe-area-inset-bottom,0px) + 10px);
+  background:linear-gradient(170deg,var(--body-hi) 0%,var(--body) 30%,var(--body-lo) 100%)}
+.top{display:flex;align-items:center;gap:8px}
+.top b{font-size:14px;letter-spacing:.28em;flex:1}
+.top b::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:9px;vertical-align:2px;background:var(--amber);box-shadow:0 0 8px var(--amber-glow)}
+.chip{font-family:var(--f-ui);font-size:13px;color:var(--text);background:rgba(255,255,255,.05);border:1px solid var(--line-2);border-radius:999px;padding:6px 13px}
+.chip:active{background:var(--amber-dim);border-color:var(--amber)}
+
+.lcd{position:relative;overflow:hidden;border-radius:14px;padding:8px 14px 10px;color:var(--amber);flex:none;
+  background:linear-gradient(180deg,var(--glass-2),var(--glass));
+  box-shadow:0 0 0 1px rgba(0,0,0,.8),0 0 0 3px var(--body-lo),0 0 0 4px var(--edge),inset 0 3px 14px rgba(0,0,0,.9)}
+.lcd::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,0) 38%),repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px)}
+.ind{display:flex;align-items:center;gap:9px;height:20px;font-size:12px;font-weight:700;text-shadow:0 0 6px var(--amber-glow)}
+.cnt{font-family:var(--f-num);font-size:14px;min-width:2ch}
+.cntl{font-size:10px;font-weight:400;opacity:.85}
+.tag{border:1.5px solid currentColor;border-radius:4px;padding:0 5px;font-size:11px;line-height:15px}
+.sp{flex:1}.sym{min-width:1.1em;text-align:center}
+.off{color:var(--amber-dim);text-shadow:none}
+.fnon{background:var(--amber);color:var(--glass);border-radius:4px;padding:0 5px}
+.val{--valfs:min(13vw,3.3rem);font-family:var(--f-num);font-weight:500;text-align:right;white-space:nowrap;overflow:hidden;font-size:var(--valfs);
+  line-height:1.2;font-variant-numeric:tabular-nums;color:var(--amber-hot);text-shadow:0 0 2px var(--amber),0 0 14px var(--amber-glow),0 0 30px rgba(255,140,20,.25)}
+.sub{display:flex;justify-content:space-between;font-size:11px;color:var(--amber);opacity:.75;font-family:var(--f-num)}
+
+.sw{display:flex;flex-wrap:wrap;gap:8px 12px;justify-content:space-between;flex:none}
+.sg{display:flex;align-items:center;gap:6px}
+.sg>span{color:var(--muted);font-family:var(--f-num);font-size:10px;letter-spacing:.14em}
+.seg{display:flex;background:var(--body-lo);border-radius:8px;padding:2px;box-shadow:inset 0 1px 3px rgba(0,0,0,.7)}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{font-family:var(--f-num);font-size:13px;color:var(--muted);padding:5px 8px;border-radius:6px}
+.seg input:checked+label{color:var(--eq-fg);background:linear-gradient(180deg,var(--eq-top),var(--eq))}
+#swTAB label{padding:5px 0;width:2.1em;text-align:center}
+
+.keys{flex:1;min-height:0;display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(7,minmax(0,1fr));gap:8px}
+.k{--c:var(--key);--t:var(--key-top);--l:var(--key-lo);font-family:var(--f-ui);font-weight:700;font-size:min(4.4vw,1.1rem);border:0;border-radius:12px;color:var(--key-fg);padding:0;
+  background:linear-gradient(180deg,var(--t),var(--c));box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 3px 0 var(--l),0 5px 8px rgba(0,0,0,.45);touch-action:manipulation}
+.k.num{--c:var(--num);--t:var(--num-top);--l:var(--num-lo);color:var(--num-fg);font-family:var(--f-num);font-size:min(7vw,1.75rem);font-weight:500}
+.k.mem{font-size:min(4vw,1rem);color:#c9ccd3}
+.k.op{--c:var(--op);--t:var(--op-top);font-size:min(7vw,1.7rem);font-weight:400}
+.k.clear{--c:var(--clr);--t:var(--clr-top);--l:var(--clr-lo)}
+.k.eq{--c:var(--eq);--t:var(--eq-top);--l:var(--eq-lo);color:var(--eq-fg);font-size:min(8vw,2rem)}
+.k.tall{grid-row:span 3}
+.k.small{font-size:min(3.8vw,.95rem)}
+.k:active,.k.hit{transform:translateY(2px);box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 1px 0 var(--l);filter:brightness(1.15)}
+
+/* テープ（下から出るシート） */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:11;max-width:520px;margin:0 auto;height:72%;display:flex;flex-direction:column;
+  background:#15181c;border-top:1px solid var(--line-2);border-radius:18px 18px 0 0;padding-bottom:env(safe-area-inset-bottom,0px);
+  -webkit-user-select:text;user-select:text}
+.sh{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.sh h2{font-family:var(--f-num);font-size:12px;font-weight:500;letter-spacing:.24em;color:var(--muted);margin:0}
+.tl{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:10px 16px;font-family:var(--f-num);font-variant-numeric:tabular-nums;font-size:16px}
+.row{display:grid;grid-template-columns:1fr 3.2em;gap:6px;padding:2px 0}
+.row .n{text-align:right;overflow-wrap:anywhere}
+.row .o{color:var(--muted);font-family:var(--f-ui);font-size:13px}
+.row.res{border-top:1px solid var(--line-2);margin-bottom:8px;padding-top:4px}
+.row.res .n{font-size:18px;color:var(--amber-hot)}
+.row.res .o{color:var(--amber)}
+.row.sep{color:var(--muted);font-family:var(--f-ui);font-size:12px;text-align:center;display:block;margin:6px 0}
+.empty{color:var(--muted);font-family:var(--f-ui);font-size:13px;line-height:1.7}
+.help{font-size:12px;line-height:1.7;color:var(--muted);padding:10px 16px 12px;border-top:1px solid var(--line)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 54px);z-index:20;background:var(--amber);color:var(--eq-fg);
+  font-size:13px;font-weight:700;border-radius:999px;padding:6px 14px;pointer-events:none}
+.toast:empty{display:none}
+@media (max-height:640px){.keys{gap:6px}.app{gap:7px}.seg label{padding:3px 7px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <b>実務電卓</b>
+    <button class="chip" id="openTape" type="button">テープ</button>
+    <button class="chip" id="copy" type="button">コピー</button>
+  </div>
+  <div class="lcd">
+    <div class="ind">
+      <span class="cnt" id="cnt"></span><span class="cntl" id="cntl"></span>
+      <span class="tag" id="tag" hidden></span>
+      <span class="sp"></span>
+      <span class="sym" id="iFn" hidden><span class="fnon">Fn</span></span>
+      <span class="sym" id="iM">M</span><span class="sym" id="iG">G</span><span class="sym" id="iE">E</span>
+      <span class="sym" id="iOp" style="font-size:15px"></span>
+    </div>
+    <div class="val" id="val" aria-live="polite">0</div>
+    <div class="sub"><span id="subL"></span><span id="subR"></span></div>
+  </div>
+  <div class="sw">
+    <div class="sg"><span>TAB</span><div class="seg" id="swTAB"></div></div>
+    <div class="sg"><span>GT</span><div class="seg" id="swGT"></div></div>
+    <div class="sg"><span>端数</span><div class="seg" id="swRND"></div></div>
+  </div>
+  <div class="keys" id="keys"></div>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<section class="sheet" id="sheet" hidden aria-label="計算テープ">
+  <div class="sh"><h2>計算テープ</h2><span><button class="chip" id="tclr" type="button">消す</button> <button class="chip" id="closeTape" type="button">閉じる</button></span></div>
+  <div class="tl" id="tl"><p class="empty">計算するとここに記録されます。</p></div>
+  <div class="help">税率の変更：税率 → 数字 → 税率。　税込を押すたびに税込額と税額が切り替わります。　GTは2回押すとクリア。　スイッチ・税率・メモリー・GTはこのiPhoneに保存されます。</div>
+</section>
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+const OPS={'+':'＋','-':'−','*':'×','/':'÷'};
+const S={acc:null,op:null,entry:'0',entering:false,hasDot:false,recalled:false,recFixed:false,k:null,
+  disp:0,dispFixed:false,err:false,mem:0,memCnt:0,gt:0,gtCnt:0,rate:10,inCnt:0,cnt:0,cntLabel:'',
+  lastKey:'',eqStreak:0,taxPhase:0,taxAmt:0,taxTotal:0,pct:null,pctOp:null,rateMode:false,rateEntry:'',tag:'',
+  tab:'F',round:'54',gtSw:false};
+const LS='jitsumu-dentaku-ios-v1';
+try{const d=JSON.parse(localStorage.getItem(LS)||'null');if(d){for(const k of ['tab','round','gtSw','rate','mem','memCnt','gt','gtCnt'])if(k in d)S[k]=d[k];}}catch(e){}
+function save(){try{localStorage.setItem(LS,JSON.stringify({tab:S.tab,round:S.round,gtSw:S.gtSw,rate:S.rate,mem:S.mem,memCnt:S.memCnt,gt:S.gt,gtCnt:S.gtCnt}))}catch(e){}}
+
+/* ---------- 数値ユーティリティ ---------- */
+const clean=x=>x===0?0:parseFloat(x.toPrecision(15));
+const over=v=>!isFinite(v)||Math.abs(v)>=1e12;
+function dec(){return S.tab==='F'?null:(S.tab==='A'?2:+S.tab)}
+function applyRound(x,d,mode){
+  const sg=x<0?-1:1,p=Math.pow(10,d);let a=clean(Math.abs(x)*p);
+  a=mode==='up'?Math.ceil(a):mode==='54'?Math.floor(a+0.5):Math.floor(a);
+  return sg*clean(a/p);
+}
+const rnd=x=>{const d=dec();return d==null?x:applyRound(x,d,S.round)};
+function calc(a,op,b){let r;switch(op){case'+':r=a+b;break;case'-':r=a-b;break;case'*':r=a*b;break;case'/':if(b===0)return NaN;r=a/b;break}return clean(r)}
+const group=i=>i.replace(/\B(?=(\d{3})+(?!\d))/g,',');
+function fmtNum(v,fd){
+  if(!isFinite(v))return '0';
+  const neg=v<0,a=Math.abs(v),n=String(Math.trunc(a)).length,room=Math.max(0,12-n);let s;
+  if(fd==null){const t=a.toFixed(Math.min(room+2,20));let[ii,dd='']=t.split('.');dd=dd.slice(0,room).replace(/0+$/,'');s=group(ii)+(dd?'.'+dd:'')}
+  else{const t=a.toFixed(Math.min(fd,room));const[ii,dd]=t.split('.');s=group(ii)+(dd!==undefined?'.'+dd:'')}
+  if(neg&&/[1-9]/.test(s))s='−'+s;return s;
+}
+function fmtEntry(str){const neg=str.startsWith('-'),s=neg?str.slice(1):str;const[i,d]=s.split('.');return(neg?'−':'')+group(i||'0')+(s.includes('.')?'.'+(d||''):'')}
+function plain(v){if(v===0)return '0';let t=v.toFixed(12);if(t.includes('.'))t=t.replace(/0+$/,'').replace(/\.$/,'');return t}
+const shown=v=>fmtNum(v,S.dispFixed?dec():null);
+
+function operandFor(op){let v=parseFloat(S.entry);if(S.tab==='A'&&!S.hasDot&&!S.recalled&&(op==='+'||op==='-'))v=clean(v/100);return v}
+function curVal(){return S.entering?(S.recalled?parseFloat(S.entry):operandFor(null)):S.disp}
+function startEntry(str,rec,recFixed){S.entry=str;S.entering=true;S.hasDot=str.includes('.');S.recalled=!!rec;S.recFixed=!!recFixed}
+
+/* ---------- テープ ---------- */
+const tl=document.getElementById('tl');let tapeEmpty=true;
+function tape(n,o,cls){
+  if(tapeEmpty){tl.innerHTML='';tapeEmpty=false}
+  const r=document.createElement('div');r.className='row'+(cls?' '+cls:'');
+  if(cls==='sep'){r.textContent=n}else{r.innerHTML='<span class="n"></span><span class="o"></span>';r.firstChild.textContent=n;r.lastChild.textContent=o||''}
+  tl.appendChild(r);while(tl.children.length>600)tl.removeChild(tl.firstChild);tl.scrollTop=tl.scrollHeight;return r;
+}
+document.getElementById('tclr').onclick=()=>{tl.innerHTML='<p class="empty">テープを消しました。</p>';tapeEmpty=true};
+
+/* ---------- 計算処理 ---------- */
+function setErr(){S.err=true;S.tag='';S.op=null;S.acc=null;S.entering=false;S.disp=0;S.dispFixed=false;tape('エラー（C で解除）','','sep')}
+function finalize(r,addGT){
+  const v=rnd(r);if(over(v)){setErr();return false}
+  S.disp=v;S.dispFixed=dec()!=null;S.acc=null;S.entering=false;S.recalled=false;
+  if(addGT&&S.gtSw){S.gt=clean(S.gt+v);S.gtCnt++;if(over(S.gt)){setErr();return false}}
+  tape(shown(v),addGT&&S.gtSw?'＊ G':'＊','res');save();return true;
+}
+function computeEq(){
+  let r;
+  if(S.pctOp&&S.pct&&!S.entering&&S.op===S.pctOp){
+    r=clean(S.pctOp==='+'?S.pct.base+S.pct.part:S.pct.base-S.pct.part);tape('','＝');S.op=null;
+  }else if(S.op!==null){
+    if(S.op==='/'&&!S.entering){r=calc(1,'/',S.acc);S.k={op:'/',val:S.acc};tape('','＝')}
+    else{const b=S.entering?operandFor(S.op):S.acc;tape(S.entering?fmtNum(b,null):'','＝');r=calc(S.acc,S.op,b);S.k=S.op==='*'?{op:'*',val:S.acc}:{op:S.op,val:b}}
+    S.op=null;
+  }else if(S.k&&S.k.op!=='/%'){
+    const x=S.entering?operandFor(S.k.op):S.disp;tape(fmtNum(x,null),OPS[S.k.op]+'K');
+    r=S.k.op==='*'?calc(S.k.val,'*',x):calc(x,S.k.op,S.k.val);tape('','＝');
+  }else{r=curVal();tape(fmtNum(r,null),'＝')}
+  S.pct=null;S.pctOp=null;return r;
+}
+const act={
+  digit(d){
+    if(S.err)return;
+    if(S.rateMode){
+      if(d==='.'){if(!S.rateEntry.includes('.'))S.rateEntry=(S.rateEntry||'0')+'.'}
+      else for(const ch of(d==='00'?'00':d)){if(S.rateEntry.replace(/\D/g,'').length>=4)break;S.rateEntry=(S.rateEntry==='0'?'':S.rateEntry)+ch}
+      return;
+    }
+    S.tag='';S.taxPhase=0;
+    if(!S.entering||S.recalled){
+      if(S.op===null&&!S.entering){S.inCnt=0;S.pct=null;S.pctOp=null}
+      S.inCnt++;S.cnt=S.inCnt;S.cntLabel='';
+      startEntry(d==='.'?'0.':(d==='00'?'0':d),false,false);
+    }else if(d==='.'){if(!S.hasDot){S.entry+='.';S.hasDot=true}}
+    else for(const ch of(d==='00'?'00':d)){
+      if(S.entry.replace(/\D/g,'').length>=12)break;
+      if(S.entry==='0'||S.entry==='-0')S.entry=S.entry.slice(0,-1)+ch;else S.entry+=ch;
+    }
+    S.lastKey='d';
+  },
+  op(o){
+    if(S.err||S.rateMode)return;
+    S.tag='';S.taxPhase=0;
+    S.pctOp=(S.lastKey==='%'&&S.pct&&(o==='+'||o==='-'))?o:null;
+    if(S.entering){
+      const use=S.op!==null?S.op:o,b=operandFor(use);
+      tape(fmtNum(b,null),OPS[o]);
+      if(S.op!==null&&S.acc!==null){const r=calc(S.acc,S.op,b);if(isNaN(r)||over(r))return setErr();S.acc=r}else S.acc=b;
+    }else if(S.op===null||S.lastKey!=='op'){S.acc=S.disp;tape(shown(S.disp),OPS[o])}
+    else{const last=tl.lastChild;if(last&&last.lastChild)last.lastChild.textContent=OPS[o]}
+    S.op=o;S.entering=false;S.recalled=false;S.disp=S.acc;S.dispFixed=false;S.lastKey='op';
+  },
+  eq(){
+    if(S.err)return;
+    if(S.rateMode)return act.rate();
+    S.tag='';S.taxPhase=0;
+    const r=computeEq();if(isNaN(r)||over(r))return setErr();
+    if(S.lastKey==='='){S.eqStreak++;S.cnt=S.eqStreak%100;S.cntLabel='＝回数'}else S.eqStreak=1;
+    finalize(r,true);S.lastKey='=';
+  },
+  pct(){
+    if(S.err||S.rateMode)return;
+    S.tag='';S.taxPhase=0;let r,b,isMul=false;
+    if(S.op===null){
+      if(S.k&&S.k.op==='/%'&&S.entering){b=parseFloat(S.entry);tape(fmtNum(b,null),'%');r=clean(b/S.k.val*100)}
+      else return;
+    }else{
+      const a=S.acc;b=S.entering?parseFloat(S.entry):a;tape(fmtNum(b,null),'%');
+      switch(S.op){
+        case'*':r=clean(a*b/100);isMul=true;break;
+        case'/':if(b===0)return setErr();r=clean(a/b*100);break;
+        case'+':r=clean(a+a*b/100);break;
+        case'-':r=clean(a-a*b/100);break;
+      }
+      S.k=S.op==='/'?{op:'/%',val:b}:null;
+      if(isMul)S.pct={base:a,part:0};else S.pct=null;
+      S.op=null;
+    }
+    if(over(r))return setErr();
+    if(finalize(r,true)&&isMul)S.pct.part=S.disp;
+    S.lastKey='%';
+  },
+  mem(sign){
+    if(S.err||S.rateMode)return;
+    S.tag='';S.taxPhase=0;let v;
+    if(S.op!==null){const r=computeEq();if(isNaN(r)||over(r))return setErr();v=rnd(r)}
+    else v=rnd(curVal());
+    if(over(v))return setErr();
+    S.mem=clean(S.mem+sign*v);if(over(S.mem))return setErr();
+    S.memCnt++;S.cnt=S.memCnt%100;S.cntLabel='M回数';
+    S.disp=v;S.dispFixed=dec()!=null;S.entering=false;S.recalled=false;S.op=null;S.acc=null;S.pct=null;S.pctOp=null;
+    tape(shown(v),sign>0?'M＋':'M−','res');S.lastKey='M';save();
+  },
+  rm(){if(S.err||S.rateMode)return;S.tag='';startEntry(plain(S.mem),true,true);S.cnt=S.memCnt%100;S.cntLabel='M回数';tape(fmtNum(S.mem,dec()),'RM');S.lastKey='RM'},
+  cm(){S.mem=0;S.memCnt=0;save();S.lastKey='CM'},
+  gt(){
+    if(S.err||S.rateMode)return;
+    if(S.lastKey==='GT'){S.gt=0;S.gtCnt=0;save();S.lastKey='';tape('GTクリア','','sep');return}
+    S.tag='';startEntry(plain(S.gt),true,true);S.cnt=S.gtCnt%100;S.cntLabel='GT回数';tape(fmtNum(S.gt,dec()),'GT');S.lastKey='GT';
+  },
+  sqrt(){if(S.err||S.rateMode)return;const v=curVal();if(v<0)return setErr();S.tag='';startEntry(plain(clean(Math.sqrt(v))),true,false);tape(fmtNum(v,null),'√');S.lastKey='sqrt'},
+  neg(){
+    if(S.err||S.rateMode)return;S.tag='';
+    if(S.entering)S.entry=S.entry.startsWith('-')?S.entry.slice(1):'-'+S.entry;
+    else startEntry(plain(-S.disp),true,S.dispFixed);
+    S.lastKey='neg';
+  },
+  ce(){
+    if(S.err)return;
+    if(S.rateMode){S.rateEntry='';return}
+    startEntry('0',false,false);S.lastKey='CE';
+  },
+  shift(){
+    if(S.rateMode){S.rateEntry=S.rateEntry.slice(0,-1);return}
+    if(S.err||!S.entering||S.recalled)return;
+    S.entry=S.entry.slice(0,-1);if(S.entry===''||S.entry==='-')S.entry='0';S.hasDot=S.entry.includes('.');
+  },
+  c(){
+    const had=!tapeEmpty&&tl.lastChild&&!tl.lastChild.classList.contains('sep');
+    Object.assign(S,{acc:null,op:null,entry:'0',entering:false,hasDot:false,recalled:false,k:null,disp:0,dispFixed:false,err:false,
+      inCnt:0,cnt:0,cntLabel:'',pct:null,pctOp:null,taxPhase:0,tag:'',rateMode:false,rateEntry:'',eqStreak:0,lastKey:'C'});
+    if(had)tape('— C —','','sep');
+  },
+  ca(){act.c();S.mem=0;S.memCnt=0;S.gt=0;S.gtCnt=0;save();S.lastKey='CA'},
+  tax(){
+    if(S.err||S.rateMode)return;
+    if(S.taxPhase===0){
+      let base;
+      if(S.op!==null){const r=computeEq();if(isNaN(r)||over(r))return setErr();if(!finalize(r,true))return;base=S.disp}
+      else base=curVal();
+      const t=rnd(base*S.rate/100),tot=clean(base+t);if(over(tot))return setErr();
+      S.taxAmt=t;S.taxTotal=tot;S.taxPhase=1;S.disp=tot;S.tag='税込';
+      tape(shown(t),'税額');tape(shown(tot),'税込','res');
+    }else if(S.taxPhase===1){S.taxPhase=2;S.disp=S.taxAmt;S.tag='税額'}
+    else{S.taxPhase=1;S.disp=S.taxTotal;S.tag='税込'}
+    S.dispFixed=dec()!=null;S.entering=false;S.recalled=false;S.op=null;S.acc=null;S.lastKey='tax';
+  },
+  rate(){
+    if(S.err)return;
+    if(!S.rateMode){S.rateMode=true;S.rateEntry='';S.tag='税率 %';return}
+    const v=parseFloat(S.rateEntry);
+    if(S.rateEntry!==''&&isFinite(v)){S.rate=clean(v);save();tape(fmtNum(S.rate,null)+' %','税率','sep')}
+    S.rateMode=false;S.tag='税率 %';S.disp=S.rate;S.dispFixed=false;S.entering=false;S.op=null;S.acc=null;S.lastKey='rate';
+  }
+};
+
+/* ---------- 画面 ---------- */
+const $=id=>document.getElementById(id);
+const valEl=$('val');
+function render(){
+  let t;
+  if(S.rateMode)t=S.rateEntry===''?fmtNum(S.rate,null):S.rateEntry;
+  else if(S.entering)t=S.recalled?fmtNum(parseFloat(S.entry),S.recFixed?dec():null):fmtEntry(S.entry);
+  else t=shown(S.disp);
+  valEl.textContent=t;
+  const len=t.replace(/[,.]/g,'').length+(t.match(/[,.]/g)||[]).length*0.45;
+  valEl.style.fontSize=len>11?'calc(var(--valfs) * '+(11/len).toFixed(3)+')':'';
+  $('cnt').textContent=S.cnt>0?String(S.cnt).padStart(2,'0'):'';
+  $('cntl').textContent=S.cnt>0?S.cntLabel:'';
+  const tg=$('tag');tg.hidden=!S.tag&&!S.rateMode;tg.textContent=S.rateMode?'税率 % 設定中':S.tag;
+  $('iM').className='sym'+(S.mem!==0?'':' off');
+  $('iG').className='sym'+(S.gt!==0?'':' off');
+  $('iE').className='sym'+(S.err?'':' off');
+  $('iOp').textContent=S.op?OPS[S.op]:(['=','%','M'].includes(S.lastKey)?'＝':'');
+  $('subL').textContent=S.k&&S.k.op!=='/%'?'定数 '+OPS[S.k.op]+' '+fmtNum(S.k.val,null):(S.k?'定数 ÷ '+fmtNum(S.k.val,null)+' %':'');
+  $('subR').textContent='税率 '+fmtNum(S.rate,null)+'%';
+}
+
+/* スイッチ */
+function seg(id,name,opts,get,set){
+  const el=$(id);
+  opts.forEach(([v,l],i)=>{
+    const iid=id+'_'+i;const inp=document.createElement('input');inp.type='radio';inp.name=name;inp.id=iid;inp.value=v;inp.checked=get()===v;
+    const lb=document.createElement('label');lb.htmlFor=iid;lb.textContent=l;
+    inp.addEventListener('change',()=>{set(v);save();render()});el.append(inp,lb);
+  });
+}
+seg('swGT','gt',[[false,'•'],[true,'GT']],()=>S.gtSw,v=>S.gtSw=v);
+seg('swTAB','tab',['F','5','4','3','2','1','0','A'].map(v=>[v,v]),()=>S.tab,v=>S.tab=v);
+seg('swRND','rnd',[['up','↑'],['54','5/4'],['down','↓']],()=>S.round,v=>S.round=v);
+
+/* キー */
+const KEYS=[
+ ['CA','ca','clear'],['C','c','clear'],['CE','ce','fn'],['→','shift','fn'],['√','sqrt','fn'],
+ ['GT','gt','mem'],['CM','cm','mem'],['RM','rm','mem'],['M−','m-','mem'],['M＋','m+','mem'],
+ ['税率','rate','fn small'],['税込','tax','fn small'],['＋/−','neg','fn small'],['%','%','op'],['÷','/','op'],
+ ['7','7','num'],['8','8','num'],['9','9','num'],['×','*','op'],['−','-','op'],
+ ['4','4','num'],['5','5','num'],['6','6','num'],['＋','+','op tall'],['＝','=','eq tall'],
+ ['1','1','num'],['2','2','num'],['3','3','num'],
+ ['0','0','num'],['00','00','num'],['・','.','num']
+];
+const btns={};const kEl=$('keys');
+KEYS.forEach(([l,c,cls])=>{const b=document.createElement('button');b.type='button';b.className='k '+cls;b.textContent=l;b.dataset.k=c;
+  b.setAttribute('aria-label',{'.':'小数点','shift':'1桁訂正','m-':'メモリーマイナス','m+':'メモリープラス','neg':'符号反転'}[c]||l);
+  b.addEventListener('click',()=>{if(fn)setFn(false);press(c)});kEl.appendChild(b);btns[c]=b});
+function press(c){
+  if(c==='copy'){copyVal();return}
+  if(c==='tapeclr'){$('tclr').click();return}
+  if(/^(\d|00|\.)$/.test(c))act.digit(c);
+  else if('+-*/'.includes(c)&&c.length===1)act.op(c);
+  else switch(c){
+    case'=':act.eq();break;case'%':act.pct();break;case'm+':act.mem(1);break;case'm-':act.mem(-1);break;
+    case'rm':act.rm();break;case'cm':act.cm();break;case'gt':act.gt();break;case'sqrt':act.sqrt();break;
+    case'neg':act.neg();break;case'ce':act.ce();break;case'shift':act.shift();break;case'c':act.c();break;
+    case'ca':act.ca();break;case'tax':act.tax();break;case'rate':act.rate();break;
+  }
+  render();
+}
+function flash(c){const b=btns[c];if(!b)return;b.classList.add('hit');setTimeout(()=>b.classList.remove('hit'),110)}
+/* ---------- IC-KP08 対応 ----------
+   物理キー位置（e.code）で判定するので NumLock オフでも数字として扱う。
+   Tab = Fn（次の1キーを第2機能に） */
+const CODE={Numpad0:'0',Numpad1:'1',Numpad2:'2',Numpad3:'3',Numpad4:'4',Numpad5:'5',Numpad6:'6',Numpad7:'7',Numpad8:'8',Numpad9:'9',
+  NumpadDecimal:'.',NumpadComma:'.',NumpadAdd:'+',NumpadSubtract:'-',NumpadMultiply:'*',NumpadDivide:'/',NumpadEnter:'=',NumpadEqual:'=',
+  Backspace:'shift',Escape:'c',Tab:'FN',F13:'%',LaunchApp2:'%'};
+const FNMAP={'/':'%','*':'sqrt','-':'m-','+':'m+','7':'rm','8':'cm','9':'gt','4':'tax','5':'rate','6':'neg',
+  '1':'ce','2':'copy','3':'tapeclr','c':'ca','shift':'CANCEL','=':'CANCEL','0':'KEEP','.':'KEEP'};
+const KB={'Enter':'=','=':'=','Delete':'ce','%':'%',',':'.','t':'tax','T':'tax',
+  'p':'m+','P':'m+','o':'m-','O':'m-','r':'rm','R':'rm','g':'gt','G':'gt'};
+let fn=false,fnTimer=null;
+function setFn(v){fn=v;document.body.classList.toggle('fn',v);$('iFn').hidden=!v;clearTimeout(fnTimer);if(v)fnTimer=setTimeout(()=>setFn(false),5000)}
+
+function flashPad(){}
+
+document.addEventListener('keydown',e=>{
+  
+  if((e.ctrlKey||e.metaKey)&&(e.key==='c'||e.key==='C')&&!String(getSelection())){e.preventDefault();copyVal();return}
+  if(e.ctrlKey||e.metaKey||e.altKey)return;
+  let c=CODE[e.code]||null;
+  if(!c){if(/^[0-9.]$/.test(e.key))c=e.key;else if('+-*/'.includes(e.key)&&e.key.length===1)c=e.key;else c=KB[e.key]||null}
+  if(!c)return;
+  e.preventDefault();
+  if(e.repeat)return;
+  flashPad(e.code);
+  if(c==='FN'){setFn(!fn);return}
+  if(fn){const f=FNMAP[c];if(f==='KEEP')return;setFn(false);if(!f||f==='CANCEL'){render();return}c=f}
+  flash(c);press(c);
+});
+
+/* コピー */
+function copyVal(){
+  const txt=valEl.textContent.replace(/,/g,'').replace('−','-');const toast=$('toast');
+  const ok=()=>{toast.textContent='「'+txt+'」をコピーしました';setTimeout(()=>toast.textContent='',1800)};
+  try{navigator.clipboard.writeText(txt).then(ok,()=>{selectVal();toast.textContent='表示を選択しました。Ctrl+C でコピーしてください'})}catch(e){selectVal()}
+}
+function selectVal(){const r=document.createRange();r.selectNodeContents(valEl);const s=getSelection();s.removeAllRanges();s.addRange(r)}
+$('copy').onclick=copyVal;
+
+render();
+})();
+</script>
+<script>
+(function(){
+  const sheet=document.getElementById('sheet'),scrim=document.getElementById('scrim'),tl=document.getElementById('tl');
+  function open(v){sheet.hidden=!v;scrim.hidden=!v;if(v)tl.scrollTop=tl.scrollHeight}
+  document.getElementById('openTape').onclick=()=>open(true);
+  document.getElementById('closeTape').onclick=()=>open(false);
+  scrim.onclick=()=>open(false);
+  document.addEventListener('gesturestart',e=>e.preventDefault());
+  if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
+})();
+</script>
+</body>
+</html>
