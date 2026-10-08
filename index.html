@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -12,7 +12,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<title>実務電卓</title>
+<title>実務電卓 v3</title>
 <style>
 /* Layout: iPhone縦画面1枚に 表示部・スイッチ・キーを収める。テープは下から出るシート */
 :root{
@@ -32,12 +32,12 @@
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;background:var(--room);color:var(--text);overscroll-behavior:none}
-body{font-family:var(--f-ui);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;overflow:hidden}
+body{font-family:var(--f-ui);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;overflow:auto}
 [hidden]{display:none!important}
-.app{height:100%;display:flex;flex-direction:column;gap:10px;max-width:520px;margin:0 auto;
+.app{height:100%;min-height:640px;display:flex;flex-direction:column;gap:10px;max-width:520px;margin:0 auto;
   padding:calc(env(safe-area-inset-top,0px) + 8px) 12px calc(env(safe-area-inset-bottom,0px) + 10px);
   background:linear-gradient(170deg,var(--body-hi) 0%,var(--body) 30%,var(--body-lo) 100%)}
-.top{display:flex;align-items:center;gap:8px}
+.top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .top b{font-size:14px;letter-spacing:.28em;flex:1}
 .top b::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:9px;vertical-align:2px;background:var(--amber);box-shadow:0 0 8px var(--amber-glow)}
 .chip{font-family:var(--f-ui);font-size:13px;color:var(--text);background:rgba(255,255,255,.05);border:1px solid var(--line-2);border-radius:999px;padding:6px 13px}
@@ -65,6 +65,7 @@ body{font-family:var(--f-ui);-webkit-user-select:none;user-select:none;-webkit-t
 .seg{display:flex;background:var(--body-lo);border-radius:8px;padding:2px;box-shadow:inset 0 1px 3px rgba(0,0,0,.7)}
 .seg input{position:absolute;opacity:0;pointer-events:none}
 .seg label{font-family:var(--f-num);font-size:13px;color:var(--muted);padding:5px 8px;border-radius:6px}
+.seg input:focus-visible+label{outline:2px solid white;outline-offset:2px}
 .seg input:checked+label{color:var(--eq-fg);background:linear-gradient(180deg,var(--eq-top),var(--eq))}
 #swTAB label{padding:5px 0;width:2.1em;text-align:center}
 
@@ -78,6 +79,12 @@ body{font-family:var(--f-ui);-webkit-user-select:none;user-select:none;-webkit-t
 .k.eq{--c:var(--eq);--t:var(--eq-top);--l:var(--eq-lo);color:var(--eq-fg);font-size:min(9vw,2.3rem)}
 .k.tall{grid-row:span 3}
 .k.small{font-size:min(3.8vw,.95rem)}
+.k{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.key-hint{font-family:var(--f-ui);font-size:clamp(9px,2.4vw,11px);font-weight:400;line-height:1.2;opacity:.85}
+.k:focus-visible,.chip:focus-visible{outline:2px solid var(--amber-hot);outline-offset:2px}
+.help{max-height:48%;overflow:auto}
+.key-guide{width:100%;border-collapse:collapse;font-size:12px;color:var(--text)}
+.key-guide td,.key-guide th{padding:5px 6px;border-bottom:1px solid var(--line);text-align:left}
 .k:active,.k.hit{transform:translateY(2px);box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 1px 0 var(--l);filter:brightness(1.15)}
 
 /* テープ（下から出るシート） */
@@ -107,7 +114,9 @@ body{font-family:var(--f-ui);-webkit-user-select:none;user-select:none;-webkit-t
 <div class="app">
   <div class="top">
     <b>実務電卓</b>
+    <button class="chip" id="openKeyHelp" type="button">キー案内</button>
     <button class="chip" id="openTape" type="button">テープ</button>
+    <button class="chip" id="rateButton" type="button">税率</button>
     <button class="chip" id="copy" type="button">コピー</button>
   </div>
   <div class="lcd">
@@ -134,7 +143,7 @@ body{font-family:var(--f-ui);-webkit-user-select:none;user-select:none;-webkit-t
 <section class="sheet" id="sheet" hidden aria-label="計算テープ">
   <div class="sh"><h2>計算テープ</h2><span><button class="chip" id="tclr" type="button">消す</button> <button class="chip" id="closeTape" type="button">閉じる</button></span></div>
   <div class="tl" id="tl"><p class="empty">計算するとここに記録されます。</p></div>
-  <div class="help">税率の変更：税率 → 数字 → 税率。　税込を押すたびに税込額と税額が切り替わります。　GTは2回押すとクリア。　スイッチ・税率・メモリー・GTはこのiPhoneに保存されます。</div>
+  <div class="help"><details id="keyGuide"><summary>キーボード操作一覧</summary><p>「F2 → キー」は同時押しではなく、F2を押してから5秒以内に次のキーを押します。iPhoneでは画面のボタンをタップしてください。</p><table class="key-guide"><thead><tr><th>ボタン・機能</th><th>直接操作</th><th>テンキー第2機能</th></tr></thead><tbody id="keyGuideRows"></tbody></table><p>数字・四則演算はテンキー対応（NumLockオン／オフ）。00は画面専用です。Tabでボタン移動、Spaceで選択したボタンを押せます。</p></details>税率の変更：税率 → 数字 → 税率。　税込を押すたびに税込額と税額が切り替わります。　GTは2回押すとクリア。　スイッチ・税率・メモリー・GTはこの端末に保存されます。 F2でテンキーの第2機能。Tabでボタン移動。税率は0〜100%。本アプリはEL-G36の完全互換ではありません。</div>
 </section>
 <div class="toast" id="toast"></div>
 <script>
@@ -145,20 +154,45 @@ const S={acc:null,op:null,entry:'0',entering:false,hasDot:false,recalled:false,r
   lastKey:'',eqStreak:0,taxPhase:0,taxAmt:0,taxTotal:0,pct:null,pctOp:null,rateMode:false,rateEntry:'',tag:'',
   tab:'F',round:'54',gtSw:false};
 const LS='jitsumu-dentaku-ios-v1';
-try{const d=JSON.parse(localStorage.getItem(LS)||'null');if(d){for(const k of ['tab','round','gtSw','rate','mem','memCnt','gt','gtCnt'])if(k in d)S[k]=d[k];}}catch(e){}
+try{const d=JSON.parse(localStorage.getItem(LS)||'null');if(d){
+  if(['F','5','4','3','2','1','0','A'].includes(d.tab))S.tab=d.tab;
+  if(['up','54','down'].includes(d.round))S.round=d.round;
+  if(typeof d.gtSw==='boolean')S.gtSw=d.gtSw;
+  for(const k of ['rate','mem','gt'])if(typeof d[k]==='number'&&Number.isFinite(d[k])&&Math.abs(d[k])<1e12&&(k!=='rate'||(d[k]>=0&&d[k]<=100)))S[k]=d[k];
+  for(const k of ['memCnt','gtCnt'])if(Number.isSafeInteger(d[k])&&d[k]>=0)S[k]=d[k];
+}}catch(e){}
 function save(){try{localStorage.setItem(LS,JSON.stringify({tab:S.tab,round:S.round,gtSw:S.gtSw,rate:S.rate,mem:S.mem,memCnt:S.memCnt,gt:S.gt,gtCnt:S.gtCnt}))}catch(e){}}
 
 /* ---------- 数値ユーティリティ ---------- */
 const clean=x=>x===0?0:parseFloat(x.toPrecision(15));
+// Decimal rational arithmetic: preserves decimal operands before binary conversion.
+function fraction(x){
+  let [m,e='0']=String(x).toLowerCase().split('e');
+  const neg=m.startsWith('-');m=m.replace('-','');
+  const [i,d='']=m.split('.');let n=BigInt(i+d),q=1n;
+  const scale=d.length-Number(e);
+  if(scale>=0)q=10n**BigInt(scale);else n*=10n**BigInt(-scale);
+  return [neg?-n:n,q];
+}
+function roundedRatio(n,q,d,mode){
+  if(q<0n){n=-n;q=-q}const sign=n<0n?-1:1;n=n<0n?-n:n;
+  n*=10n**BigInt(d);let z=n/q,rem=n%q;
+  if((mode==='up'&&rem>0n)||(mode==='54'&&rem*2n>=q))z++;
+  return sign*Number(z)/10**d;
+}
 const over=v=>!isFinite(v)||Math.abs(v)>=1e12;
 function dec(){return S.tab==='F'?null:(S.tab==='A'?2:+S.tab)}
-function applyRound(x,d,mode){
-  const sg=x<0?-1:1,p=Math.pow(10,d);let a=clean(Math.abs(x)*p);
-  a=mode==='up'?Math.ceil(a):mode==='54'?Math.floor(a+0.5):Math.floor(a);
-  return sg*clean(a/p);
-}
+function applyRound(x,d,mode){if(!Number.isFinite(x))return x;const[n,q]=fraction(x);return roundedRatio(n,q,d,mode)}
 const rnd=x=>{const d=dec();return d==null?x:applyRound(x,d,S.round)};
-function calc(a,op,b){let r;switch(op){case'+':r=a+b;break;case'-':r=a-b;break;case'*':r=a*b;break;case'/':if(b===0)return NaN;r=a/b;break}return clean(r)}
+function calc(a,op,b){
+  if(!Number.isFinite(a)||!Number.isFinite(b)||(op==='/'&&b===0))return NaN;
+  const [an,aq]=fraction(a),[bn,bq]=fraction(b);let n,q;
+  if(op==='+'){n=an*bq+bn*aq;q=aq*bq}
+  if(op==='-'){n=an*bq-bn*aq;q=aq*bq}
+  if(op==='*'){n=an*bn;q=aq*bq}
+  if(op==='/'){n=an*bq;q=aq*bn}
+  return clean(Number(n)/Number(q));
+}
 const group=i=>i.replace(/\B(?=(\d{3})+(?!\d))/g,',');
 function fmtNum(v,fd){
   if(!isFinite(v))return '0';
@@ -190,7 +224,7 @@ function setErr(){S.err=true;S.tag='';S.op=null;S.acc=null;S.entering=false;S.di
 function finalize(r,addGT){
   const v=rnd(r);if(over(v)){setErr();return false}
   S.disp=v;S.dispFixed=dec()!=null;S.acc=null;S.entering=false;S.recalled=false;
-  if(addGT&&S.gtSw){S.gt=clean(S.gt+v);S.gtCnt++;if(over(S.gt)){setErr();return false}}
+  if(addGT&&S.gtSw){const next=clean(S.gt+v);if(over(next)){setErr();return false}S.gt=next;S.gtCnt++}
   tape(shown(v),addGT&&S.gtSw?'＊ G':'＊','res');save();return true;
 }
 function computeEq(){
@@ -275,7 +309,7 @@ const act={
     if(S.op!==null){const r=computeEq();if(isNaN(r)||over(r))return setErr();v=rnd(r)}
     else v=rnd(curVal());
     if(over(v))return setErr();
-    S.mem=clean(S.mem+sign*v);if(over(S.mem))return setErr();
+    const next=clean(S.mem+sign*v);if(over(next))return setErr();S.mem=next;
     S.memCnt++;S.cnt=S.memCnt%100;S.cntLabel='M回数';
     S.disp=v;S.dispFixed=dec()!=null;S.entering=false;S.recalled=false;S.op=null;S.acc=null;S.pct=null;S.pctOp=null;
     tape(shown(v),sign>0?'M＋':'M−','res');S.lastKey='M';save();
@@ -311,24 +345,25 @@ const act={
     if(had)tape('— C —','','sep');
   },
   ca(){act.c();S.mem=0;S.memCnt=0;S.gt=0;S.gtCnt=0;save();S.lastKey='CA'},
-  tax(){
+  tax(exclude=false){
     if(S.err||S.rateMode)return;
-    if(S.taxPhase===0){
+    if(S.taxPhase===0||S.taxKind!==exclude){
+      S.taxKind=exclude;
       let base;
       if(S.op!==null){const r=computeEq();if(isNaN(r)||over(r))return setErr();if(!finalize(r,true))return;base=S.disp}
       else base=curVal();
-      const t=rnd(base*S.rate/100),tot=clean(base+t);if(over(tot))return setErr();
-      S.taxAmt=t;S.taxTotal=tot;S.taxPhase=1;S.disp=tot;S.tag='税込';
-      tape(shown(t),'税額');tape(shown(tot),'税込','res');
+      const net=exclude?rnd(calc(base,'/',1+S.rate/100)):base,t=exclude?clean(base-net):rnd(calc(base,'*',S.rate/100)),tot=exclude?net:clean(base+t);if(over(tot))return setErr();
+      S.taxAmt=t;S.taxTotal=tot;S.taxPhase=1;S.disp=tot;S.tag=exclude?'税抜':'税込';
+      tape(shown(t),'税額');tape(fmtNum(tot,dec()),exclude?'税抜':'税込','res');
     }else if(S.taxPhase===1){S.taxPhase=2;S.disp=S.taxAmt;S.tag='税額'}
-    else{S.taxPhase=1;S.disp=S.taxTotal;S.tag='税込'}
+    else{S.taxPhase=1;S.disp=S.taxTotal;S.tag=exclude?'税抜':'税込'}
     S.dispFixed=dec()!=null;S.entering=false;S.recalled=false;S.op=null;S.acc=null;S.lastKey='tax';
   },
   rate(){
     if(S.err)return;
     if(!S.rateMode){S.rateMode=true;S.rateEntry='';S.tag='税率 %';return}
     const v=parseFloat(S.rateEntry);
-    if(S.rateEntry!==''&&isFinite(v)){S.rate=clean(v);save();tape(fmtNum(S.rate,null)+' %','税率','sep')}
+    if(S.rateEntry!==''&&isFinite(v)&&v>=0&&v<=100){S.rate=clean(v);save();tape(fmtNum(S.rate,null)+' %','税率','sep')}
     S.rateMode=false;S.tag='税率 %';S.disp=S.rate;S.dispFixed=false;S.entering=false;S.op=null;S.acc=null;S.lastKey='rate';
   }
 };
@@ -372,15 +407,36 @@ seg('swRND','rnd',[['up','↑'],['54','5/4'],['down','↓']],()=>S.round,v=>S.ro
 const KEYS=[
  ['CA','ca','clear'],['C','c','clear'],['CE','ce','fn'],['→','shift','fn'],['√','sqrt','fn'],
  ['GT','gt','mem'],['CM','cm','mem'],['RM','rm','mem'],['M−','m-','mem'],['M＋','m+','mem'],
- ['税率','rate','fn small'],['税込','tax','fn small'],['＋/−','neg','fn small'],['%','%','op'],['÷','/','op'],
+ ['税抜','taxout','fn small'],['税込','tax','fn small'],['＋/−','neg','fn small'],['%','%','op'],['÷','/','op'],
  ['7','7','num'],['8','8','num'],['9','9','num'],['×','*','op'],['−','-','op'],
  ['4','4','num'],['5','5','num'],['6','6','num'],['＋','+','op tall'],['＝','=','eq tall'],
  ['1','1','num'],['2','2','num'],['3','3','num'],
  ['0','0','num'],['00','00','num'],['・','.','num']
 ];
+const KEYHELP={
+  ca:['Shift+Esc','F2 → Esc','すべて消去（メモリー・GTも消去）'],
+  c:['Esc','','計算をクリア（メモリー・GTは保持）'],
+  ce:['Delete','F2 → 1','入力中の数値を消去'],
+  shift:['Backspace','','末尾の1桁を訂正'],
+  sqrt:['','F2 → ×','平方根'],
+  gt:['G','F2 → 9','GT呼出し・続けて2回でGT消去'],
+  cm:['','F2 → 8','メモリー消去'],rm:['R','F2 → 7','メモリー呼出し'],
+  'm-':['O','F2 → −','メモリーマイナス'],'m+':['P','F2 → ＋','メモリープラス'],
+  taxout:['U','','税抜額・税額の切替'],tax:['T','F2 → 4','税込額・税額の切替'],
+  neg:['','F2 → 6','符号反転'],'%':['%','F2 → ÷','パーセント'],
+  '/':['÷ /','','割り算'],'*':['× *','','掛け算'],
+  '-':['− -','','引き算'],'+':['＋ +','','足し算'],
+  '=':['Enter / =','','計算結果'],'.':['小数点','','小数点'],
+  '00':['画面専用','','00入力'],rate:['','F2 → 5','税率設定'],
+  copy:['Ctrl+C','F2 → 2','表示をコピー'],tapeclr:['','F2 → 3','テープ消去']
+};
 const btns={};const kEl=$('keys');
-KEYS.forEach(([l,c,cls])=>{const b=document.createElement('button');b.type='button';b.className='k '+cls;b.textContent=l;b.dataset.k=c;
+KEYS.forEach(([l,c,cls])=>{const b=document.createElement('button');b.type='button';b.className='k '+cls;b.dataset.k=c;
+  const label=document.createElement('span');label.textContent=l;b.appendChild(label);
+  const info=KEYHELP[c];
+  if(info){const hint=document.createElement('span');hint.className='key-hint';hint.textContent=info[0]||info[1];b.appendChild(hint);b.title=info[2]+'：'+[info[0],info[1]].filter(Boolean).join(' ／ ')}
   b.setAttribute('aria-label',{'.':'小数点','shift':'1桁訂正','m-':'メモリーマイナス','m+':'メモリープラス','neg':'符号反転'}[c]||l);
+  if(info)b.setAttribute('aria-label',l+'、'+info[2]+'、'+[info[0],info[1]].filter(Boolean).join(' または '));
   b.addEventListener('click',()=>{if(fn)setFn(false);press(c)});kEl.appendChild(b);btns[c]=b});
 function press(c){
   if(c==='copy'){copyVal();return}
@@ -391,33 +447,37 @@ function press(c){
     case'=':act.eq();break;case'%':act.pct();break;case'm+':act.mem(1);break;case'm-':act.mem(-1);break;
     case'rm':act.rm();break;case'cm':act.cm();break;case'gt':act.gt();break;case'sqrt':act.sqrt();break;
     case'neg':act.neg();break;case'ce':act.ce();break;case'shift':act.shift();break;case'c':act.c();break;
-    case'ca':act.ca();break;case'tax':act.tax();break;case'rate':act.rate();break;
+    case'ca':act.ca();break;case'tax':act.tax();break;case'rate':act.rate();break;case'taxout':act.tax(true);break;
   }
   render();
 }
 function flash(c){const b=btns[c];if(!b)return;b.classList.add('hit');setTimeout(()=>b.classList.remove('hit'),110)}
 /* ---------- IC-KP08 対応 ----------
    物理キー位置（e.code）で判定するので NumLock オフでも数字として扱う。
-   Tab = Fn（次の1キーを第2機能に） */
+   F2 = Fn（次の1キーを第2機能に） */
 const CODE={Numpad0:'0',Numpad1:'1',Numpad2:'2',Numpad3:'3',Numpad4:'4',Numpad5:'5',Numpad6:'6',Numpad7:'7',Numpad8:'8',Numpad9:'9',
   NumpadDecimal:'.',NumpadComma:'.',NumpadAdd:'+',NumpadSubtract:'-',NumpadMultiply:'*',NumpadDivide:'/',NumpadEnter:'=',NumpadEqual:'=',
-  Backspace:'shift',Escape:'c',Tab:'FN',F13:'%',LaunchApp2:'%'};
+  Backspace:'shift',Escape:'c',F2:'FN',F13:'%',LaunchApp2:'%'};
 const FNMAP={'/':'%','*':'sqrt','-':'m-','+':'m+','7':'rm','8':'cm','9':'gt','4':'tax','5':'rate','6':'neg',
   '1':'ce','2':'copy','3':'tapeclr','c':'ca','shift':'CANCEL','=':'CANCEL','0':'KEEP','.':'KEEP'};
 const KB={'Enter':'=','=':'=','Delete':'ce','%':'%',',':'.','t':'tax','T':'tax',
-  'p':'m+','P':'m+','o':'m-','O':'m-','r':'rm','R':'rm','g':'gt','G':'gt'};
+  'u':'taxout','U':'taxout','p':'m+','P':'m+','o':'m-','O':'m-','r':'rm','R':'rm','g':'gt','G':'gt'};
 let fn=false,fnTimer=null;
 function setFn(v){fn=v;document.body.classList.toggle('fn',v);$('iFn').hidden=!v;clearTimeout(fnTimer);if(v)fnTimer=setTimeout(()=>setFn(false),5000)}
 
 function flashPad(){}
 
 document.addEventListener('keydown',e=>{
+  if(e.target.closest?.('input,select,textarea,[contenteditable=true]'))return;
+  if(!$('sheet').hidden){if(e.key==='Escape')$('closeTape').click();return;}
+  if(e.key==='Enter'&&e.target.tagName==='BUTTON')return;
   
   if((e.ctrlKey||e.metaKey)&&(e.key==='c'||e.key==='C')&&!String(getSelection())){e.preventDefault();copyVal();return}
   if(e.ctrlKey||e.metaKey||e.altKey)return;
   let c=CODE[e.code]||null;
   if(!c){if(/^[0-9.]$/.test(e.key))c=e.key;else if('+-*/'.includes(e.key)&&e.key.length===1)c=e.key;else c=KB[e.key]||null}
   if(!c)return;
+  if(c==='c'&&e.shiftKey&&!fn)c='ca';
   e.preventDefault();
   if(e.repeat)return;
   flashPad(e.code);
@@ -434,6 +494,14 @@ function copyVal(){
 }
 function selectVal(){const r=document.createRange();r.selectNodeContents(valEl);const s=getSelection();s.removeAllRanges();s.addRange(r)}
 $('copy').onclick=copyVal;
+$('rateButton').onclick=()=>press('rate');
+$('rateButton').title='税率設定：F2 → 5';
+for(const [c,info] of Object.entries(KEYHELP)){
+  const row=document.createElement('tr');
+  for(const txt of [(KEYS.find(k=>k[1]===c)?.[0]||{rate:'税率',copy:'コピー',tapeclr:'テープを消す'}[c])+'：'+info[2],info[0]||'—',info[1]||'—']){const cell=document.createElement('td');cell.textContent=txt;row.appendChild(cell)}
+  $('keyGuideRows').appendChild(row);
+}
+$('openKeyHelp').onclick=()=>{$('openTape').click();$('keyGuide').open=true};
 
 render();
 })();
@@ -445,9 +513,24 @@ render();
   document.getElementById('openTape').onclick=()=>open(true);
   document.getElementById('closeTape').onclick=()=>open(false);
   scrim.onclick=()=>open(false);
-  document.addEventListener('gesturestart',e=>e.preventDefault());
-  if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
+  
+  if('serviceWorker' in navigator){
+  let refreshing=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshing)location.reload()});
+  addEventListener('load',async()=>{try{
+    const reg=await navigator.serviceWorker.register('sw.js',{updateViaCache:'none'});
+    function offer(){if(!reg.waiting||!navigator.serviceWorker.controller)return;
+      const b=document.createElement('button');b.className='chip';b.textContent='更新する';
+      b.onclick=()=>{if(confirm('計算表示とテープを消して更新します。メモリー・GT・設定は保持します。')){refreshing=true;reg.waiting.postMessage({type:'ACTIVATE'})}};
+      if(!document.getElementById('updateButton')){b.id='updateButton';document.querySelector('.top').append(b)}
+    }
+    offer();reg.addEventListener('updatefound',()=>reg.installing?.addEventListener('statechange',offer));
+    reg.update().catch(()=>{});
+  }catch(e){document.getElementById('toast').textContent='オフライン準備に失敗しました。通信時に開き直してください。'}});
+}
 })();
 </script>
 </body>
 </html>
+
+
