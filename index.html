@@ -68,14 +68,14 @@ body{font-family:var(--f-ui);-webkit-user-select:none;user-select:none;-webkit-t
 .seg input:checked+label{color:var(--eq-fg);background:linear-gradient(180deg,var(--eq-top),var(--eq))}
 #swTAB label{padding:5px 0;width:2.1em;text-align:center}
 
-.keys{flex:1;min-height:0;display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(7,minmax(0,1fr));gap:8px}
-.k{--c:var(--key);--t:var(--key-top);--l:var(--key-lo);font-family:var(--f-ui);font-weight:700;font-size:min(4.4vw,1.1rem);border:0;border-radius:12px;color:var(--key-fg);padding:0;
+.keys{flex:1;min-height:0;display:grid;gap:8px;grid-template-columns:repeat(3,minmax(0,1.18fr)) repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,.72fr)) repeat(4,minmax(0,1.3fr))}
+.k{--c:var(--key);--t:var(--key-top);--l:var(--key-lo);font-family:var(--f-ui);font-weight:700;font-size:min(4vw,1rem);border:0;border-radius:12px;color:var(--key-fg);padding:0;
   background:linear-gradient(180deg,var(--t),var(--c));box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 3px 0 var(--l),0 5px 8px rgba(0,0,0,.45);touch-action:manipulation}
-.k.num{--c:var(--num);--t:var(--num-top);--l:var(--num-lo);color:var(--num-fg);font-family:var(--f-num);font-size:min(7vw,1.75rem);font-weight:500}
+.k.num{--c:var(--num);--t:var(--num-top);--l:var(--num-lo);color:var(--num-fg);font-family:var(--f-num);font-size:min(10vw,2.5rem);font-weight:600;border-radius:14px}
 .k.mem{font-size:min(4vw,1rem);color:#c9ccd3}
-.k.op{--c:var(--op);--t:var(--op-top);font-size:min(7vw,1.7rem);font-weight:400}
+.k.op{--c:var(--op);--t:var(--op-top);font-size:min(8vw,2rem);font-weight:400}
 .k.clear{--c:var(--clr);--t:var(--clr-top);--l:var(--clr-lo)}
-.k.eq{--c:var(--eq);--t:var(--eq-top);--l:var(--eq-lo);color:var(--eq-fg);font-size:min(8vw,2rem)}
+.k.eq{--c:var(--eq);--t:var(--eq-top);--l:var(--eq-lo);color:var(--eq-fg);font-size:min(9vw,2.3rem)}
 .k.tall{grid-row:span 3}
 .k.small{font-size:min(3.8vw,.95rem)}
 .k:active,.k.hit{transform:translateY(2px);box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 1px 0 var(--l);filter:brightness(1.15)}
@@ -100,7 +100,7 @@ body{font-family:var(--f-ui);-webkit-user-select:none;user-select:none;-webkit-t
 .toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 54px);z-index:20;background:var(--amber);color:var(--eq-fg);
   font-size:13px;font-weight:700;border-radius:999px;padding:6px 14px;pointer-events:none}
 .toast:empty{display:none}
-@media (max-height:640px){.keys{gap:6px}.app{gap:7px}.seg label{padding:3px 7px}}
+@media (max-height:640px){.keys{gap:6px}.k.num{font-size:min(8.5vw,2.1rem)}.app{gap:7px}.seg label{padding:3px 7px}}
 </style>
 </head>
 <body>
