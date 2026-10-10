@@ -12,7 +12,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<title>実務電卓 v5</title>
+<title>実務電卓 v6</title>
 <style>
 /* Layout: iPhone縦画面1枚に 表示部・スイッチ・キーを収める。テープは下から出るシート */
 :root{
@@ -177,6 +177,17 @@ body{background:#111419}
  .k{padding:3px 2px;border-radius:10px}.k.num{font-size:clamp(28px,8.6vw,36px);border-radius:11px}.k.op{font-size:27px}.k.eq{font-size:34px}.k.mem,.k.small,.k.clear{font-size:14px}
  .key-hint{display:none}
 }
+
+
+/* v6: larger numerals within the existing viewport layout. */
+.val{--valfs:clamp(40px,12.5vw,60px);line-height:1.05}
+.k.num{font-size:clamp(32px,9.8vw,44px);font-weight:600;line-height:1.05}
+@media(max-width:440px),(pointer:coarse){
+ .lcd{min-height:104px}
+ .val{--valfs:clamp(39px,12.2vw,52px);padding:3px 0 4px;line-height:1.05}
+ .k.num{font-size:clamp(32px,10vw,41px);line-height:1.05}
+}
+@media(max-width:350px){.k.num{font-size:32px}.val{--valfs:39px}}
 
 </style>
 </head>
@@ -449,6 +460,7 @@ function render(){
   valEl.textContent=t;
   const len=t.replace(/[,.]/g,'').length+(t.match(/[,.]/g)||[]).length*0.45;
   valEl.style.fontSize=len>11?'calc(var(--valfs) * '+(11/len).toFixed(3)+')':'';
+  if(valEl.clientWidth>0){for(let i=0;i<3&&valEl.scrollWidth>valEl.clientWidth;i++){const size=parseFloat(getComputedStyle(valEl).fontSize);valEl.style.fontSize=(size*valEl.clientWidth/valEl.scrollWidth*.98)+'px';}}
   $('cnt').textContent=S.cnt>0?String(S.cnt).padStart(2,'0'):'';
   $('cntl').textContent=S.cnt>0?S.cntLabel:'';
   const tg=$('tag');tg.hidden=!S.tag&&!S.rateMode;tg.textContent=S.rateMode?'税率 % 設定中':S.tag;
@@ -602,6 +614,7 @@ render();
 </script>
 </body>
 </html>
+
 
 
 
