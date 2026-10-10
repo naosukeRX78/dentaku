@@ -1,5 +1,5 @@
 // Every release must use a new cache version.
-const VERSION='jitsumu-v4-20261010-layout1';
+const VERSION='jitsumu-v5-20261010-metal1';
 const FILES=['./','./index.html','./manifest.webmanifest','./apple-touch-icon.png','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(VERSION).then(c=>c.addAll(FILES))));
 self.addEventListener('message',e=>{if(e.data?.type==='ACTIVATE')self.skipWaiting()});

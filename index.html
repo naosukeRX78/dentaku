@@ -12,7 +12,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<title>実務電卓 v4</title>
+<title>実務電卓 v5</title>
 <style>
 /* Layout: iPhone縦画面1枚に 表示部・スイッチ・キーを収める。テープは下から出るシート */
 :root{
@@ -153,6 +153,30 @@ body{background:#111419}
  .lcd{min-height:116px}.chip{min-height:36px}
 }
 @media(max-width:350px){.app{padding-left:10px;padding-right:10px}.chip{font-size:11px;padding:7px 4px}.seg label{padding-left:6px;padding-right:6px}.sg{gap:5px}.sw{gap:8px}.keys{gap:7px}.k.mem,.k.small{font-size:13px}}
+
+
+/* v5: fit the available viewport before distributing key height. */
+.app{background:repeating-linear-gradient(0deg,#ffffff02 0 1px,transparent 1px 3px),linear-gradient(125deg,#41474f,#292e35 28%,#353b42 60%,#20262d);border-color:#78808a;box-shadow:inset 0 1px 0 #c9d0d766,inset 1px 0 0 #ffffff20,inset -1px 0 0 #0008,0 20px 60px #0005}
+.lcd{background:linear-gradient(160deg,#111c20,#080f12);border:1px solid #080b0e;box-shadow:0 0 0 1px #82909c,0 0 0 3px #1a2027,inset 0 3px 8px #0009}
+.k{border-top-color:#a8b0ba70;border-left-color:#9ca6b240;border-right-color:#141a24;border-bottom-color:#111821;background:linear-gradient(175deg,#66717e 0%,#495461 9%,#3a4551 48%,#333e49 95%);box-shadow:inset 0 1px 0 #e8f0ff40,inset 1px 0 0 #ffffff12,inset -1px -2px 0 #0004,0 3px 0 #151c24,0 5px 6px #0005;text-shadow:0 1px 1px #0007}
+.k.num{background:linear-gradient(170deg,#f8f9f9 0%,#dfe4e8 12%,#c5cdd4 49%,#e0e5e9 92%,#aeb8c1 100%);color:#202a34;border-top-color:#ffffff;border-left-color:#e4ebf0;border-right-color:#82909e;border-bottom-color:#7c8996;box-shadow:inset 0 1px 0 #fff,inset 1px 0 0 #fff8,inset -1px -2px 0 #71819150,0 3px 0 #687583,0 5px 6px #0005;text-shadow:0 1px 0 #ffffffaa}
+.k.op{background:linear-gradient(175deg,#8291a1,#5b6d7f 13%,#42566b 65%,#4c6075);color:#eef3f8}
+.k.clear{background:linear-gradient(175deg,#d38776,#ad6555 12%,#8d4a3d 80%,#9c584a);border-top-color:#e3b1a690;box-shadow:inset 0 1px 0 #f7cec540,inset -1px -2px 0 #0003,0 3px 0 #54332b,0 5px 6px #0004}
+.k.eq{background:linear-gradient(170deg,#ffe0a0,#e8bf70 14%,#c99b45 65%,#e5b65f 94%);color:#352915;border-top-color:#ffe9bf;border-left-color:#f4d398;border-right-color:#997335;border-bottom-color:#8d692d;box-shadow:inset 0 1px 0 #fff5,inset -1px -2px 0 #7b572440,0 3px 0 #89652c,0 5px 7px #0005;text-shadow:0 1px 0 #ffe7b580}
+.k:active,.k.hit{transform:translateY(2px);box-shadow:inset 0 2px 4px #0004,0 1px 0 #18212a;filter:brightness(.94)}
+@media(max-width:440px),(pointer:coarse){
+ html,body{height:100%;min-height:0}
+ .app{height:100vh;height:100dvh;min-height:calc(610px + env(safe-area-inset-top,0px) + env(safe-area-inset-bottom,0px));gap:8px;padding:calc(env(safe-area-inset-top,0px) + 8px) 12px calc(env(safe-area-inset-bottom,0px) + 8px);border:0;border-radius:0}
+ .top{gap:6px}.top b{font-size:14px;line-height:20px;padding:0;letter-spacing:.12em}
+ .chip{min-height:32px;line-height:18px;font-size:11px;padding:6px 7px}
+ .lcd{min-height:96px;padding:9px 13px 10px;margin:2px 1px}
+ .val{--valfs:clamp(34px,10.5vw,44px);line-height:1.08;padding:3px 0 4px}
+ .ind{height:16px}.sub{line-height:14px;min-height:14px}
+ .sw{gap:6px 10px}.sg{gap:7px}.seg{padding:2px}.seg label{line-height:20px;padding-top:1px;padding-bottom:1px}#swTAB label{padding-top:1px;padding-bottom:1px}
+ .keys{min-height:350px;gap:7px;grid-template-rows:repeat(3,minmax(44px,.72fr)) repeat(4,minmax(44px,1.2fr));}
+ .k{padding:3px 2px;border-radius:10px}.k.num{font-size:clamp(28px,8.6vw,36px);border-radius:11px}.k.op{font-size:27px}.k.eq{font-size:34px}.k.mem,.k.small,.k.clear{font-size:14px}
+ .key-hint{display:none}
+}
 
 </style>
 </head>
