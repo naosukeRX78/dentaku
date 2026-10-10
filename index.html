@@ -12,7 +12,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<title>実務電卓 v3</title>
+<title>実務電卓 v4</title>
 <style>
 /* Layout: iPhone縦画面1枚に 表示部・スイッチ・キーを収める。テープは下から出るシート */
 :root{
@@ -108,6 +108,52 @@ body{font-family:var(--f-ui);-webkit-user-select:none;user-select:none;-webkit-t
   font-size:13px;font-weight:700;border-radius:999px;padding:6px 14px;pointer-events:none}
 .toast:empty{display:none}
 @media (max-height:640px){.keys{gap:6px}.k.num{font-size:min(8.5vw,2.1rem)}.app{gap:7px}.seg label{padding:3px 7px}}
+
+/* v4: explicit space for each label, touch targets and restrained materials. */
+:root{--body-hi:#292d33;--body:#202329;--body-lo:#171a1f;--amber:#efb75f;--amber-hot:#f8d49a;--amber-glow:transparent;--f-num:ui-monospace,"SF Mono","Consolas",monospace}
+html,body{min-height:100%;height:auto}
+body{background:#111419}
+.app{height:100vh;height:100svh;min-height:800px;max-width:540px;gap:14px;padding:24px 20px 22px;background:linear-gradient(145deg,#2b3037,#20242a 45%,#171b20);border:1px solid #353b44;border-radius:26px;box-shadow:0 24px 64px #0005}
+.top{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;align-items:center;flex:none}
+.top b{grid-column:1/-1;white-space:nowrap;font-size:15px;font-weight:650;letter-spacing:.16em;line-height:24px;padding:0 0 4px}
+.top b::before{width:6px;height:6px;margin-right:10px;vertical-align:2px;box-shadow:none}
+.chip{min-height:36px;padding:7px 9px;font-size:12px;font-weight:500;line-height:20px;white-space:nowrap;border-radius:10px;background:#ffffff05;border-color:#ffffff18;box-shadow:inset 0 1px 0 #ffffff05}
+#updateButton{grid-column:1/-1;color:var(--amber-hot)}
+.lcd{padding:12px 16px 14px;border-radius:16px;background:linear-gradient(145deg,#10171a,#101316);box-shadow:inset 0 2px 6px #0007,0 0 0 1px #505761;min-height:120px}
+.lcd::after{background:linear-gradient(140deg,#ffffff04,transparent 60%)}
+.ind{font-size:11px;height:18px;gap:8px;text-shadow:none;font-weight:600}
+.cnt{font-size:12px}.off{color:#efb75f30}
+.val{--valfs:clamp(36px,11vw,52px);font-family:var(--f-num);font-weight:400;line-height:1.15;letter-spacing:-.04em;padding:4px 0 6px;text-shadow:none}
+.sub{font-size:10px;line-height:16px;opacity:.9;gap:8px;min-height:16px}
+#subL{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#subR{white-space:nowrap;flex:none}
+.sw{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px}
+.sg:first-child{grid-column:1/-1}.sg{gap:8px;min-width:0}.sg:last-child{justify-content:flex-end}
+.sg>span{font-size:9px;letter-spacing:.1em;min-width:26px}
+.seg{padding:3px;border:1px solid #ffffff08;border-radius:9px;box-shadow:inset 0 1px 3px #0004}
+.seg label{font-size:12px;line-height:22px;padding:2px 9px;border-radius:6px}
+#swTAB{flex:1;justify-content:space-between}#swTAB label{width:auto;flex:1;padding:2px 0;text-align:center}
+.seg input:checked+label{background:linear-gradient(#f7c982,#eeb359);box-shadow:0 1px 3px #0004}
+.keys{gap:9px;flex:1;min-height:430px;grid-template-columns:repeat(3,minmax(0,1.15fr)) repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(48px,.76fr)) repeat(4,minmax(62px,1.15fr))}
+.k{min-width:0;min-height:0;padding:5px 2px;gap:3px;font-size:14px;line-height:1.1;border-radius:11px;border:1px solid #ffffff0d;background:linear-gradient(#383e47,#2b3038);box-shadow:inset 0 1px 0 #ffffff08,0 2px 0 #101318,0 3px 5px #0003;overflow:hidden}
+.k>span:first-child{display:block;flex:none;white-space:nowrap;line-height:1.15}
+.key-hint{font-size:9px;line-height:12px;letter-spacing:0;color:inherit;opacity:.7;white-space:nowrap;flex:none}
+.k.num{font-family:var(--f-ui);font-size:clamp(28px,8.6vw,38px);font-weight:550;color:#23272b;border-radius:12px;border-color:#ffffff66;background:linear-gradient(#f2f0e9,#e3e0d7);box-shadow:inset 0 1px 0 #fff,0 3px 0 #99978e,0 4px 6px #0003}
+.k.mem{font-size:14px;color:#d5d9df}.k.small{font-size:14px}
+.k.op{font-family:var(--f-ui);font-size:30px;font-weight:400;background:linear-gradient(#464e59,#363e49)}
+.k.clear{background:linear-gradient(#aa5749,#8d4036);box-shadow:inset 0 1px 0 #ffffff14,0 2px 0 #572821,0 3px 5px #0003}
+.k.eq{font-family:var(--f-ui);font-size:36px;font-weight:400;color:#2e2415;background:linear-gradient(#f7c77b,#e8ad4e);box-shadow:inset 0 1px 0 #ffffff60,0 3px 0 #976c29,0 4px 6px #0003}
+.k:active,.k.hit{transform:translateY(2px);box-shadow:inset 0 1px 4px #0002;filter:brightness(.96)}
+.sheet{border-radius:20px 20px 0 0;background:#1c2026}.tl{min-height:60px}.help{flex:none;max-height:48%}
+@media(min-width:600px){body{padding:24px 0}.app{height:calc(100vh - 48px);min-height:820px}}
+@media(max-width:440px),(pointer:coarse){
+ .key-hint{display:none}
+ .app{border:0;border-radius:0;box-shadow:none;gap:12px;height:100svh;min-height:calc(820px + env(safe-area-inset-top,0px) + env(safe-area-inset-bottom,0px));padding:calc(env(safe-area-inset-top,0px) + 12px) 14px calc(env(safe-area-inset-bottom,0px) + 16px)}
+ .keys{min-height:386px;gap:8px;grid-template-rows:repeat(3,minmax(44px,.76fr)) repeat(4,minmax(52px,1.15fr))}
+ .k{padding:4px 2px}.k.num{font-size:34px}.k.mem,.k.small,.k.clear{font-size:15px}.k.op{font-size:28px}.k.eq{font-size:34px}
+ .lcd{min-height:116px}.chip{min-height:36px}
+}
+@media(max-width:350px){.app{padding-left:10px;padding-right:10px}.chip{font-size:11px;padding:7px 4px}.seg label{padding-left:6px;padding-right:6px}.sg{gap:5px}.sw{gap:8px}.keys{gap:7px}.k.mem,.k.small{font-size:13px}}
+
 </style>
 </head>
 <body>
@@ -514,7 +560,7 @@ render();
   document.getElementById('closeTape').onclick=()=>open(false);
   scrim.onclick=()=>open(false);
   
-  if('serviceWorker' in navigator){
+  if('serviceWorker' in navigator&&location.protocol!=='file:'){
   let refreshing=false;
   navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshing)location.reload()});
   addEventListener('load',async()=>{try{
@@ -532,5 +578,7 @@ render();
 </script>
 </body>
 </html>
+
+
 
 
