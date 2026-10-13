@@ -189,6 +189,37 @@ body{background:#111419}
 }
 @media(max-width:350px){.k.num{font-size:32px}.val{--valfs:39px}}
 
+
+/* v7: touch layout only; desktop and all calculation handlers stay unchanged. */
+@media(max-width:440px),(pointer:coarse){
+ html,body{height:100%;min-height:0}
+ .app{height:100vh;height:100dvh;min-height:0;gap:6px;padding:calc(env(safe-area-inset-top,0px) + 4px) 12px calc(env(safe-area-inset-bottom,0px) + 20px)}
+ .top{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+ .top:has(#updateButton){grid-template-columns:repeat(5,minmax(0,1fr))}
+ .top b{grid-column:1/-1;line-height:16px;font-size:12px;letter-spacing:.1em;padding:0}
+ .chip{min-height:32px;line-height:18px;padding:6px 3px;font-size:11px;border-radius:8px}
+ #updateButton{grid-column:auto}
+ .lcd{min-height:88px;padding:6px 12px 7px;margin:2px 1px;flex-shrink:0}
+ .val{padding:2px 0;line-height:1.02}
+ .ind{height:14px;line-height:14px;font-size:10px}.cnt{font-size:11px}
+ .sub{font-size:10px;line-height:12px;min-height:12px}
+ .sw{gap:4px 10px}.seg{padding:1px}.seg label{line-height:20px;padding-top:0;padding-bottom:0}#swTAB label{padding-top:0;padding-bottom:0}
+ .keys{min-height:0;gap:6px;grid-template-rows:repeat(3,minmax(44px,.72fr)) repeat(4,minmax(44px,1.16fr));}
+ .k{padding:3px 2px}.k.num{font-size:clamp(32px,10vw,41px)}
+ .sh .chip{min-height:36px}
+}
+/* Compact displays keep the key targets; release decorative/header space first. */
+@media(max-height:700px) and (max-width:440px), (max-height:700px) and (pointer:coarse){
+ .app{gap:5px;padding-top:calc(env(safe-area-inset-top,0px) + 3px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 14px)}
+ .top b{display:none}.top{gap:3px}
+ .lcd{min-height:76px;padding:4px 10px 5px}.val{--valfs:clamp(32px,10vw,40px)}
+ .keys{gap:5px}.k.num{font-size:32px}
+}
+/* Landscape has less vertical space: all functions remain reachable by scrolling. */
+@media(max-height:480px) and (pointer:coarse){
+ .app{height:auto;min-height:100dvh}.keys{flex:none;min-height:338px}
+}
+
 </style>
 </head>
 <body>
@@ -614,6 +645,7 @@ render();
 </script>
 </body>
 </html>
+
 
 
 
