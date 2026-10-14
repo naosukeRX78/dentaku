@@ -7,12 +7,12 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="実務電卓">
-<meta name="theme-color" content="#0e1013">
+<meta name="theme-color" content="#f5f8fc">
 <meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<title>実務電卓 v6</title>
+<title>実務電卓 v8</title>
 <style>
 /* Layout: iPhone縦画面1枚に 表示部・スイッチ・キーを収める。テープは下から出るシート */
 :root{
@@ -219,6 +219,30 @@ body{background:#111419}
 @media(max-height:480px) and (pointer:coarse){
  .app{height:auto;min-height:100dvh}.keys{flex:none;min-height:338px}
 }
+
+
+/* v8: white housing and distinct, high contrast tactile keys. */
+:root{color-scheme:light;--room:#edf1f6;--body:#fff;--body-hi:#fff;--body-lo:#e3e9f1;--text:#172334;--muted:#4b5e74;--line:#dce3ed;--line-2:#c9d5e4;--amber:#194a86;--amber-hot:#101820;--amber-dim:#d9e6f3;--glass:#fff;--eq-fg:#231b06}
+body{background:#edf1f6}
+.app{background:linear-gradient(145deg,#fff,#f5f8fc 60%,#e8eef6);border-color:#cbd6e3;box-shadow:inset 0 1px 0 #fff,0 16px 48px #28436520}
+.top b{color:#263d58}.top b::before{background:#2468b2}
+.chip{color:#234461;background:#fff;border:1px solid #c1cfdf;box-shadow:0 2px 0 #d6e0eb}
+.lcd{color:#101820;background:linear-gradient(#fff,#f8fbfc);border:1px solid #9babbd;box-shadow:inset 0 2px 6px #3c516a18,0 0 0 3px #e3ebf3}
+.lcd::after{background:none}.val{color:#0c1119;text-shadow:none;font-weight:600}.ind,.sub{color:#263b51;text-shadow:none}.off{color:#c1cbd6}.fnon{background:#235f9b;color:#fff}
+.seg{background:#e4ebf3;border-color:#cbd6e4;box-shadow:inset 0 1px 3px #29425e20}.seg label{color:#3b4e63}.seg input:checked+label{color:#fff;background:linear-gradient(#347bbf,#205a98);box-shadow:0 1px 2px #16426c55}.seg input:focus-visible+label{outline-color:#1657a1}
+.k{--c:#e3edf9;--t:#f5f9ff;--l:#9dafc4;color:#203d5c;background:linear-gradient(175deg,var(--t),var(--c));border:1px solid #ffffff80;border-bottom-color:var(--l);box-shadow:inset 0 2px 0 #ffffff90,inset 0 -2px 0 #00000012,0 3px 0 var(--l),0 5px 7px #24415b28;text-shadow:none}
+.k.num{--c:#eef2f7;--t:#fff;--l:#a6b4c4;color:#101820;background:linear-gradient(175deg,var(--t),var(--c));border:1px solid #c3cedb;box-shadow:inset 0 2px 0 #fff,0 3px 0 var(--l),0 5px 7px #24415b28;text-shadow:none}
+.k.mem,.k.op{--t:#2877ca;--c:#154e94;--l:#103666;color:#fff;background:linear-gradient(175deg,var(--t),var(--c));font-weight:650}
+.k[data-k="tax"],.k[data-k="taxout"]{--t:#168451;--c:#09613a;--l:#06452b;color:#fff}
+.k.clear{--t:#d9474d;--c:#ad202b;--l:#7f1720;color:#fff;background:linear-gradient(175deg,var(--t),var(--c));box-shadow:inset 0 2px 0 #ffffff50,0 3px 0 var(--l),0 5px 7px #24415b28}
+.k[data-k="%"],.k[data-k="/"]{--t:#8950bd;--c:#60308f;--l:#412063}
+.k.eq{--t:#ffe29a;--c:#e8b647;--l:#a4781f;color:#241b08;background:linear-gradient(175deg,var(--t),var(--c));border-color:#d5a744;box-shadow:inset 0 2px 0 #fff8,0 3px 0 var(--l),0 5px 7px #24415b28;text-shadow:none;font-weight:650}
+.k:active,.k.hit{transform:translateY(2px);box-shadow:inset 0 2px 4px #0002,0 1px 0 var(--l);filter:brightness(.96)}
+.k:focus-visible,.chip:focus-visible{outline:3px solid #112f52;outline-offset:2px}
+.sheet{background:#f7faff;border-color:#c5d2e3}.row.res .n{color:#172b41}.row.res .o{color:#195894}.toast{background:#235f9b;color:#fff}
+@media(min-width:600px) and (pointer:fine){.app{min-height:720px;height:calc(100dvh - 48px)}.keys{min-height:360px;grid-template-rows:repeat(3,minmax(44px,.76fr)) repeat(4,minmax(48px,1.15fr))}}
+@media(max-width:440px),(pointer:coarse){.app{box-shadow:none}.k{border-radius:11px}.k.num{border-radius:12px}}
+@media(max-height:560px) and (pointer:coarse){.app{height:auto;min-height:100dvh}.keys{flex:none;min-height:338px}}
 
 </style>
 </head>
